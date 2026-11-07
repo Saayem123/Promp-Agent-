@@ -1,0 +1,8 @@
+{"role": "user", "text": "Hi, I'm looking for a property."}
+{"role": "assistant", "text": "Sure, happy to help. Are you looking for somewhere to live in, or more as an investment?"}
+{"role": "user", "text": "investment"}
+{"role": "assistant", "text": "Got it. Are you after rental income from it, or more holding it a few years for the growth? The two usually point to different things."}
+{"role": "user", "text": "5mn"}
+{"role": "assistant", "text": "Okay, around 5 million. Apartment or villa?"}
+{"role": "user", "text": "apartment, 4 bed, abu dhabi"}
+{"role": "assistant", "text": "Abu Dhabi, a 4 bedroom apartment, around 5 million. I'll stay on that."}
