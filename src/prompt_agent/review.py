@@ -90,6 +90,22 @@ BEDROOM_ASSERT = re.compile(
     re.I,
 )
 
+GREETING_OPEN = re.compile(
+    r"^\s*(?:hi|hey|hello|hey there)\b",
+    re.I,
+)
+REINTRO = re.compile(
+    r"\b(?:i'm|i am)\s+khalid\b",
+    re.I,
+)
+MODON_ASSISTANT_OPENER = re.compile(
+    r"^\s*(?:hi\.?\s+)?(?:i'm|i am)\s+modon'?s?\s+(?:ai\s+)?assistant\b",
+    re.I,
+)
+NAME_IN_ASSISTANT = re.compile(
+    r"\bhi\s+([A-Z][a-z]+)\b",
+)
+
 
 @dataclass
 class Finding:
@@ -167,6 +183,8 @@ def _new_memory() -> dict:
         "dodged": set(),
         "names": [],
         "name_uses": 0,
+        "customer_name": None,
+        "assistant_turns": 0,
         "stopped": False,
         "bare_unbound": False,
     }
@@ -345,10 +363,61 @@ def _check_names(library: dict, turn: int, text: str, memory: dict) -> list[Find
                     "style.name-once",
                     f"Their name {name} has already been used.",
                     text,
-                    "Use their name once, early, and then stop.",
+                    "Use their name once in your first message, then never again.",
                 )
             )
             break
+    if memory["assistant_turns"] > 0 and memory.get("customer_name"):
+        name = memory["customer_name"]
+        if re.search(rf"\b{re.escape(name)}\b", text):
+            findings.append(
+                _finding(
+                    library,
+                    turn,
+                    "after_first.no-name-again",
+                    "Their name appears after the intro message.",
+                    text,
+                    "Never use their name again after message one.",
+                )
+            )
+    return findings
+
+
+def _check_intro(library: dict, turn: int, text: str, memory: dict) -> list[Finding]:
+    if memory["assistant_turns"] == 0:
+        hi_name = NAME_IN_ASSISTANT.search(text)
+        if hi_name:
+            memory["customer_name"] = hi_name.group(1)
+        return []
+    findings = []
+    if GREETING_OPEN.search(text):
+        findings.append(
+            _finding(
+                library,
+                turn,
+                "after_first.no-greeting",
+                "This message opens with a greeting after the intro.",
+                text,
+                "Start with the answer or a short reaction. No Hi or Hey on message two onward.",
+            )
+        )
+    lowered = text.lower()
+    if (
+        REINTRO.search(text)
+        or MODON_ASSISTANT_OPENER.search(text)
+        or "modon's ai assistant" in lowered
+        or "khalid here from modon" in lowered
+    ):
+        findings.append(
+            _finding(
+                library,
+                turn,
+                "after_first.no-reintro",
+                "This message re-introduces you or Modon's assistant.",
+                text,
+                "You introduced yourself in message one only. Start with the answer.",
+            )
+        )
     return findings
 
 
@@ -384,6 +453,7 @@ def review_turns(brief: dict, library: dict, turns: list[dict]) -> list[Finding]
             continue
         findings.extend(_check_words(library, index, text))
         findings.extend(_check_memory(library, index, text, memory, slots))
+        findings.extend(_check_intro(library, index, text, memory))
         findings.extend(_check_names(library, index, text, memory))
         findings.extend(_check_stop(library, index, text, memory))
         if brief["channel"] == "voice":
@@ -399,6 +469,7 @@ def review_turns(brief: dict, library: dict, turns: list[dict]) -> list[Finding]
                         "Keep a spoken turn to a few short sentences, then stop and let them talk.",
                     )
                 )
+        memory["assistant_turns"] += 1
         _note_assistant(memory, text, slots)
     return findings
 

@@ -51,6 +51,10 @@ def test_modon_whatsapp_prompt_is_usable():
     assert "roughly what budget" in lowered
     assert "how many bedrooms" in lowered
     assert "wallah" in lowered
+    assert "introduce yourself exactly once" in lowered
+    assert "do not name a project in your first message" in lowered
+    assert "when not to use the project shape" in lowered
+    assert "modon real estate" in lowered
     assert "here's everything" not in lowered or "full list" in lowered
     assert "!" not in prompt
     assert "{{" not in prompt
@@ -204,6 +208,17 @@ def test_extract_marks_a_hard_section():
     text = "# Notes\n## The hard rules\n1. Never invent a price to keep the chat moving forward.\n"
     rules = extract_rules(text, origin="test")
     assert rules[0]["kind"] == "hard"
+
+
+def test_reintro_transcript():
+    import json
+
+    brief = _brief("modon-property.brief.yaml")
+    turns = [json.loads(line) for line in (EXAMPLES / "transcripts" / "reintro.jsonl").read_text().splitlines()]
+    findings = review_turns(brief, _library("whatsapp"), turns)
+    rules = {item.rule_id for item in findings}
+    assert "after_first.no-greeting" in rules
+    assert "after_first.no-reintro" in rules
 
 
 def test_domain_slot_patterns_are_not_mutated():
