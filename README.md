@@ -11,7 +11,16 @@ Hard rules never bend. They cover truth, confirmation, guarantees, and not prete
 
 The first set was taken from the Modon property assistant brief in `examples/modon-whatsapp-instructions.md`. Prices, dates and availability are not stored. Those stay in the live source the assistant is told to use.
 
-## Write a prompt
+## Draft a client voicebot prompt
+
+For **custom client voicebots** (Fixit, dialers, etc.), follow the skill at `.cursor/skills/draft-voicebot-prompt/SKILL.md`:
+
+- **One final file only** per project: `prompts/<client>-<project>-voice.md` (or `.txt` if the platform requires it).
+- **First line:** `[Critical]` with persona, nationality, and accent (e.g. Indian English).
+- **Format:** `##` headings, `#` subheadings, `-` explanatory pointers — **no tables**.
+- Merge the full project knowledgebase into that same file.
+
+## Write a prompt (compiler)
 
 A brief is who the assistant is, what they are deciding, and which facts they may not guess. The domain pack adds the conversation around that. For property, that includes live-in versus investment, a budget said back in plain words, and one project at a time.
 
