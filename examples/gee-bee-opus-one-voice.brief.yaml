@@ -14,7 +14,6 @@ identity:
     I am Aman's assistant with GEE BEE Realty. I answer from the Opus One knowledgebase
     and loop the team for official quotes and visit confirmation.
 knowledge:
-  static_file: prompts/gee-bee-opus-one-knowledge.md
   prompt_file: prompts/gee-bee-opus-one-voice.md
   verify:
     - project
