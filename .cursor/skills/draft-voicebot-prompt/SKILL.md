@@ -12,12 +12,19 @@ description: >-
 
 Use this skill whenever you create or revise a **phone / voicebot** system prompt in this repository (not the compiled Modon outputs from `prompt-agent compile`, unless the user asks to change that pipeline).
 
-## Deliverable — one file only
+## Deliverable — one file per channel (outbound and inbound)
 
-- Ship **exactly one** final prompt file per client or project.
-- Path: `prompts/<client>-<project>-voice.md` (preferred) or `prompts/<client>-<project>-voice.txt` if the platform requires plain text only.
-- **Do not** split knowledge into a separate `*-knowledge.md` and `*-voice.md` for the client deliverable. Merge the full knowledge base into the same file under a dedicated section (for example `## Opus One knowledgebase`).
-- Optional `examples/<id>.brief.yaml` may point to that single file via `knowledge.prompt_file` only — no parallel static KB path for end users.
+- When the client uses **both** dialer and helpline, ship **two** final files with the **same knowledgebase body** and **different call-type sections**:
+  - `prompts/<client>-<project>-voice-outbound.md`
+  - `prompts/<client>-<project>-voice-inbound.md`
+- If only one channel exists, ship one file using the matching suffix (`-outbound` or `-inbound`).
+- **Do not** split knowledge into a separate `*-knowledge.md`; merge the full knowledge base inside each file under `## … knowledgebase` (duplicate is fine so each Fixit bot is self-contained).
+- Optional `examples/*-voice-outbound.brief.yaml` and `*-voice-inbound.brief.yaml` each point to their `knowledge.prompt_file`.
+
+### Outbound vs inbound
+
+- **Outbound:** platform opening includes reach-out / enquiry framing (for example `{lead_name} ji, I am reaching out because you showed interest in properties around Chandigarh. Still exploring options?`). Stage 1 after they engage. Keep `## Where did you get my number` when relevant.
+- **Inbound:** customer dialed in — **no** "reaching out", **no** "you showed interest", **no** "I wanted to inform you about Opus One" on platform or agent turns. Platform opening: greet plus **how may I help**. Stage 1 starts when **they** name Opus One, pricing, site visit, or Chandigarh property — then USPs plus "know more?". Replace number-source section with `## What this inbound call is`. Ban outbound callback language in `[Critical]` and in call progression.
 
 ## Formatting (mandatory)
 
@@ -45,18 +52,19 @@ Tailor nationality, accent, and language rules to the brief. The `[Critical]` li
 
 - The **first sentence the caller hears** is **not** generated from this prompt. The telephony / Fixit platform plays it from a **separate hardcoded script** (opening line config, TTS preset, or dialer field).
 - Document that opening in a section such as `## Opening line (platform — out of prompt)`. State clearly: **you do not generate, repeat, or paraphrase this line** on your first turn; your dialogue begins on the **second** beat, after the lead responds.
-- Default Indian-property pattern (adapt region and project per brief):
+- **Outbound** default (adapt region per brief):
   - `{lead_name} ji, I am reaching out to you because you have shown interest in properties around {city/region}. Are you still exploring some options?`
-  - Without name: drop `{lead_name} ji` and start with "I am reaching out..."
-- Include Punjabi/Hindi variants in the same section if the campaign uses them — still **out of prompt**, platform-fired only.
+- **Inbound** default:
+  - `Namaste, welcome to {company}, {agent} here. How may I help you today?` — no reach-out, no enquiry assumption.
+- Include Punjabi/Hindi variants in the same section if needed — still **out of prompt**, platform-fired only.
 - Never confuse the `[Critical]` document line with the spoken opening. One is **instructions** (in the prompt file); the other is **audio** (outside the prompt file).
 
 ## Call progression (mandatory staging)
 
 After the platform opening, the **first turn you generate** must follow this ladder. Do not skip stages or dump the knowledgebase early.
 
-- **Stage 0 (platform, out of prompt):** Interest check only — why you are calling + "still exploring options?" No project name required in stage 0 unless the brief says otherwise; user may add project in stage 1.
-- **Stage 1 (first generated turn, if they engage):** Introduce the project in **two or three short USPs** only — hyper-luxury township, location one-liner, one certification or scale fact (for example IGBC Platinum, large three-plus-one to five-plus-one formats). **No amenity laundry list.** End with **one** follow-up: whether they would like to know more (vary wording every call).
+- **Stage 0 (platform, out of prompt):** Outbound — interest check and still exploring; inbound — greet and how may I help only.
+- **Stage 1:** Outbound — after they engage; inbound — after they name the project or need — in both cases give **two or three short USPs** (hyper-luxury township, location one-liner, one certification or scale fact). **No amenity laundry list.** Inbound must never frame as "reason I'm calling you". End with **one** follow-up: whether they would like to know more (vary wording every call).
 - **Stage 2 (if they say yes or ask):** Answer their thread in **tight turns** — sizes, location landmarks, payment defer to RM, amenities **only as asked**.
 - **Stage 3 (when genuine interest):** Objective ask — site visit at Eco City / official quote pack on WhatsApp with layouts.
 - **Stage 4:** Low-level detail — unit house names, carpet and super areas, technical specs, consultant pedigree, master plan zones, comparisons to other Tricity pockets.
@@ -92,10 +100,10 @@ Mirror the depth of a senior call prompt (persona, voice, **opening out-of-promp
 
 1. Read the user brief, sample prompt, and any PDFs/brochures.
 2. Build a structured internal outline (units, amenities, contacts) — **without tables**.
-3. Write **one** `prompts/...-voice.md` file: `[Critical]` first, then `##` sections, `#` subsections, `-` pointers.
-4. Document platform opening under `## Opening line (platform — out of prompt)` and `## Call progression`.
-5. Update `examples/*-voice.brief.yaml` to reference only that file if a brief exists.
-6. Remove or avoid committing extra split deliverables unless the user explicitly wants both.
+3. Write `prompts/...-voice-outbound.md` and/or `...-voice-inbound.md`: `[Critical]` first (state call type), then `##` sections, `#` subsections, `-` pointers.
+4. Document platform opening under `## Opening line — outbound` or `## Opening line — inbound` (both **out of prompt**).
+5. Update matching `examples/*-brief.yaml` files.
+6. Do not ship a generic `*-voice.md` without inbound/outbound suffix when both channels exist.
 
 ## Quality checks before finishing
 
@@ -104,5 +112,5 @@ Mirror the depth of a senior call prompt (persona, voice, **opening out-of-promp
 - Staged call flow: objective opening → USPs → interested to know more → detail → close ask.
 - Knowledgebase is **extensive** (USP bank + full amenities + units + specs + defer list).
 - Zero tables in the deliverable.
-- Exactly one client-facing prompt file.
+- One file per channel (outbound and/or inbound); each self-contained.
 - Headings use `##` and `#` as specified; lists use `-` only.

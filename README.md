@@ -15,7 +15,7 @@ The first set was taken from the Modon property assistant brief in `examples/mod
 
 For **custom client voicebots** (Fixit, dialers, etc.), follow the skill at `.cursor/skills/draft-voicebot-prompt/SKILL.md`:
 
-- **One final file only** per project: `prompts/<client>-<project>-voice.md` (or `.txt` if the platform requires it).
+- **One file per channel** when needed: `prompts/<client>-<project>-voice-outbound.md` and `prompts/<client>-<project>-voice-inbound.md` (same KB; different opening and call progression).
 - **First line:** `[Critical]` with persona, nationality, and accent (e.g. Indian English).
 - **Format:** `##` headings, `#` subheadings, `-` explanatory pointers — **no tables**.
 - Merge the full project knowledgebase into that same file.
